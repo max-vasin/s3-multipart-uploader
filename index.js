@@ -4,6 +4,7 @@ const log = require('consola')
 const yargs = require('yargs')
 
 const upload = require('./upload')
+const state = require('./state')
 
 yargs
   .command(
@@ -44,11 +45,52 @@ yargs
         })
     },
     async argv => {
-      const { source, bucket, chunks, profile, parallel, fileKey } = argv
+      const { source, bucket, chunks, profile, parallel, fileKey, region } = argv
       return upload(source, bucket, chunks, {
         profile,
         parallel,
-        fileKey
+        fileKey,
+        region
+      })
+    }
+  )
+  .command(
+    'state <bucket> <user> <app> <upload>',
+    'display upload status',
+    config => {
+      config
+        .positional('bucket', {
+          describe: 'bucket where multipart upload located',
+          type: 'string'
+        })
+        .positional('user', {
+          describe: 'user id',
+          type: 'string'
+        })
+        .positional('app', {
+          describe: 'app id',
+          type: 'string'
+        })
+        .positional('upload', {
+          describe: 'key of file for multipart upload',
+          type: 'string'
+        })
+        .option('profile', {
+          describe: 'AWS profile to use as credentials',
+          type: 'string'
+        })
+        .option('region', {
+          describe: 'AWS bucket location region',
+          type: 'string',
+          default: 'eu-west-3'
+        })
+
+    },
+    async argv => {
+      const { bucket, user, app, upload, profile, region } = argv
+      return state(bucket, user, app, upload, {
+        profile,
+        region
       })
     }
   )
